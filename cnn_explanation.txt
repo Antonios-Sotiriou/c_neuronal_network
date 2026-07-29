@@ -1,0 +1,7 @@
+i have a neuronal network with input layer consisted of 8 perceptrons. 
+Two hidden layers constisted of 4 perceptrons each and an output layer consisted of 2 perceptrons. 
+The number of the weights of a perceptron is the number of the previous perceptrons. 
+I forward propagate the data and at last output neuron i do a softmax_activation. 
+In previous neurons i do rectified linear activation. I calculate then the loss. 
+Is my implementation correct so far? 
+How do i go from here to do backward propagation?

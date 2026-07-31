@@ -15,6 +15,7 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
 endif()
 
 set(PROJECT_DATA_DIR "${PROJECT_SOURCE_DIR}/datasets/")
+set(PROJECT_MODELS_DIR "${PROJECT_SOURCE_DIR}/models/")
 configure_file("main.h.in" "${PROJECT_SOURCE_DIR}/headers/cmake_variables.h")
 
 target_include_directories(cnn PUBLIC "${PROJECT_SOURCE_DIR}")

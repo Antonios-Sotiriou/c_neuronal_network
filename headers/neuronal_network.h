@@ -34,7 +34,8 @@ typedef struct {
 
 typedef struct {
 	Neuron *neurons;
-	int total_neurons;
+	int total_neurons, epochs, batch_size;
+	float learning_rate;
 } NeuronalNetwork;
 
 void createNeuronalNetwork(NeuronalNetwork *nt, const int neuronLayers);
@@ -49,13 +50,14 @@ void softmaxActivation(Neuron *out);
 float lossEntropy(Neuron *out, const int target[]);
 void propagateBackward(NeuronalNetwork *nt, const int target[]);
 void accumulateGradients(NeuronalNetwork *nt, float **delta);
-void updateNetworkBatchParameters(NeuronalNetwork *nt, const int batch_size, const float learning_rate);
+void updateNetworkBatchParameters(NeuronalNetwork *nt);
 void updateNeuronBatchParameters(Neuron *n, const int batch_size, const float learning_rate);
 float evaluateTestSet(NeuronalNetwork *nt, Dataset *dt);
-int getNetworkPrediction(Neuron *n);
+int getNetworkPrediction(NeuronalNetwork *nt);
 int identifyDigit(NeuronalNetwork *nt, Digit *dg);
 void printNeuronWeights(Neuron *n);
 void printNeuron(Neuron *n);
+void printNeuronalNetwork(NeuronalNetwork *nt);
 void freeNeuron(Neuron *n);
 void freeNeuronalNetwork(NeuronalNetwork *nt);
 

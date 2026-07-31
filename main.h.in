@@ -2,3 +2,4 @@
 #define PROJECT_NAME                 "@PROJECT_NAME@"
 #define PROJECT_SOURCE_DIR           "@PROJECT_SOURCE_DIR@"
 #define PROJECT_DATA_DIR             "@PROJECT_DATA_DIR@"
+#define PROJECT_MODELS_DIR           "@PROJECT_MODELS_DIR@"

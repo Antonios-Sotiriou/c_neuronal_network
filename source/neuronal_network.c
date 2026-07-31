@@ -15,9 +15,10 @@ void initNeuron(Neuron *n, const int type, const int input_parameters, const int
 	srand(time(0));
 
 	n->type = type;
-	n->weights_dim_x = perceptrons;
-	n->weights_dim_y = input_parameters;
 	if (n->type != INPUT_LAYER) {
+		n->weights_dim_x = perceptrons;
+		n->weights_dim_y = input_parameters;
+
 		n->weights = malloc(sizeof(double) * n->weights_dim_x);
 		n->weights_acc = malloc(sizeof(double) * n->weights_dim_x);
 		if (!n->weights) {
@@ -194,9 +195,9 @@ void accumulateGradients(NeuronalNetwork *nt, float **delta) {
 		delta_index++;
 	}
 }
-void updateNetworkBatchParameters(NeuronalNetwork *nt, const int batch_size, const float learning_rate) {
+void updateNetworkBatchParameters(NeuronalNetwork *nt) {
 	for (int active_neuron = nt->total_neurons - 1; active_neuron > 0; active_neuron--) {
-		updateNeuronBatchParameters(&nt->neurons[active_neuron], batch_size, learning_rate);
+		updateNeuronBatchParameters(&nt->neurons[active_neuron], nt->batch_size, nt->learning_rate);
 	}
 }
 void updateNeuronBatchParameters(Neuron *n, const int batch_size, const float learning_rate) {
@@ -253,6 +254,25 @@ void printNeuron(Neuron *n) {
 	for (int i = 0; i < n->num_of_perceptrons; i++) {
 		printf("Neuron cell %d    bias: %f    bias_acc: %f    pre_activation: %f    post_activation: %f\n", i, n->perceptrons[i].bias, n->perceptrons[i].bias_acc, n->perceptrons[i].pre_activation, n->perceptrons[i].post_activation);
 	}
+}
+void printNeuronalNetwork(NeuronalNetwork *nt) {
+	printf("Neuronal Network {\n");
+	printf("    Epochs               : %d\n", nt->epochs);
+	printf("    batch Size           : %d\n", nt->batch_size);
+	printf("    Learning Rate        : %f\n", nt->learning_rate);
+	printf("    Total Neurons        : %d\n", nt->total_neurons);
+	for (int i = 0; i < nt->total_neurons; i++) {
+		if (i == 0) {
+	        printf("    Input Perceptrons    : %d\n", nt->neurons[inputNeuron].num_of_perceptrons);
+		} else if (i == nt->total_neurons - 1) {
+	        printf("    Output Perceptrons   : %d\n", nt->neurons[outputNeuron].num_of_perceptrons);
+		} else {
+	        printf("    Layer %d Perceptrons  : %d\n", i, nt->neurons[firstNeuron].num_of_perceptrons);
+		}
+	    printf("    weights_dim_x        : %d\n", nt->neurons[i].weights_dim_x);
+		printf("    weights_dim_y        : %d\n", nt->neurons[i].weights_dim_y);
+	}
+	printf("};\n");
 }
 void freeNeuron(Neuron *n) {
 	for (int i = 0; i < n->num_of_perceptrons; i++) {

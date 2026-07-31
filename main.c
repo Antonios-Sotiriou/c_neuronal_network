@@ -10,27 +10,25 @@ int main(int argv, char *argc[]) {
 		return -1;
 	}
 
-	Neuron inputNeuron = { 0 };
-	Neuron firstNeuron = { 0 };
-	Neuron secondNeuron = { 0 };
-	Neuron outputNeuron = { 0 };
-	initNeuron(&inputNeuron, INPUT_LAYER, 0, mnist.pixels_pro_digit);
-	initNeuron(&firstNeuron, FIRST_HIDDEN_LAYER, inputNeuron.num_of_perceptrons, 128);
-	initNeuron(&secondNeuron, SECOND_HIDDEN_LAYER, firstNeuron.num_of_perceptrons, 128);
-	initNeuron(&outputNeuron, OUTPUT_LAYER, secondNeuron.num_of_perceptrons, 10);
+	NeuronalNetwork net = { 0 };
+	createNeuronalNetwork(&net, 4);
+	initNeuron(&net.neurons[inputNeuron], INPUT_LAYER, 0, mnist.pixels_pro_digit);
+	initNeuron(&net.neurons[firstNeuron], FIRST_HIDDEN_LAYER, net.neurons[inputNeuron].num_of_perceptrons, 40);
+	initNeuron(&net.neurons[secondNeuron], SECOND_HIDDEN_LAYER, net.neurons[firstNeuron].num_of_perceptrons, 40);
+	initNeuron(&net.neurons[outputNeuron], OUTPUT_LAYER, net.neurons[secondNeuron].num_of_perceptrons, 10);
 
 	int epochs = 30;
-	int batch_size = 20;
-	float learning_rate = 0.01;
+	int batch_size = 16;
+	float learning_rate = 0.002;
 
 	printf("Neuronal Network {\n");
 	printf("    Epochs              : %d\n", epochs);
 	printf("    batch Size          : %d\n", batch_size);
 	printf("    Learning Rate       : %f\n", learning_rate);
-	printf("    Input Perceptrons   : %d\n", inputNeuron.num_of_perceptrons);
-	printf("    Layer 1 Perceptrons : %d\n", firstNeuron.num_of_perceptrons);
-	printf("    Layer 2 Perceptrons : %d\n", secondNeuron.num_of_perceptrons);
-	printf("    Output Perceptrons  : %d\n", outputNeuron.num_of_perceptrons);
+	printf("    Input Perceptrons   : %d\n", net.neurons[inputNeuron].num_of_perceptrons);
+	printf("    Layer 1 Perceptrons : %d\n", net.neurons[firstNeuron].num_of_perceptrons);
+	printf("    Layer 2 Perceptrons : %d\n", net.neurons[secondNeuron].num_of_perceptrons);
+	printf("    Output Perceptrons  : %d\n", net.neurons[outputNeuron].num_of_perceptrons);
 	printf("    Samples {\n");
 
 	for (int epoch = 0; epoch < epochs; epoch++) {
@@ -40,35 +38,30 @@ int main(int argv, char *argc[]) {
 
 		for (int i = 0; i < mnist.total_digits; i++) {
 
-			initInputNeuron(&inputNeuron, &mnist.digits[i]);
-			propagateForward(&inputNeuron, &firstNeuron);
-			propagateForward(&firstNeuron, &secondNeuron);
-			propagateForward(&secondNeuron, &outputNeuron);
+			initInputNeuron(&net.neurons[inputNeuron], &mnist.digits[i]);
+			propagateForward(&net);
 
 			int target_output[10] = { 0 };
 			target_output[mnist.digits[i].value] = 1;
-			float loss = lossEntropy(&outputNeuron, target_output);
+			float loss = lossEntropy(&net.neurons[outputNeuron], target_output);
 			epoch_loss_sum += loss;
 
 			//printf("Computed loss: %f\n", loss);
-			int prediction = getNetworkPrediction(&outputNeuron);
+			int prediction = getNetworkPrediction(&net);
 			if (prediction == mnist.digits[i].value) {
 				correct_predictions++;
 			}
 
-			propagateBackward(&outputNeuron, &secondNeuron, &firstNeuron, &inputNeuron, target_output);
+			propagateBackward(&net, target_output);
 			count_samples++;
 
 			if (count_samples == batch_size) {
-				updateBatchParameters(&outputNeuron, batch_size, learning_rate);
-				updateBatchParameters(&secondNeuron, batch_size, learning_rate);
-				updateBatchParameters(&firstNeuron, batch_size, learning_rate);
+				updateNetworkBatchParameters(&net, batch_size, learning_rate);
 				count_samples = 0;
 			}
 		}
 
-		//float test_accuracy = evaluateTestSet(&inputNeuron, &firstNeuron, &secondNeuron, &outputNeuron, &mnist);
-		//printf("Epoche [%d/%d] --> Genauigkeit auf Testdaten: %.2f%%\n", epoch, epochs, test_accuracy);
+		//printf("Epoche [%d/%d] --> Genauigkeit auf Testdaten: %.2f%%\n", epoch, epochs, evaluateTestSet(&net, &mnist));
 
 		float average_loss = epoch_loss_sum / (float)(mnist.total_digits);
 		float train_accuracy = ((float)correct_predictions / mnist.total_digits) * 100.0f;
@@ -79,8 +72,10 @@ int main(int argv, char *argc[]) {
 	printf("    }\n");
 	printf("}\n");
 
-	float test_accuracy = evaluateTestSet(&inputNeuron, &firstNeuron, &secondNeuron, &outputNeuron, &mnist);
-	printf("Epochs %d | Genauigkeit auf Testdaten: %.2f%%\n", epochs, test_accuracy);
+	freeDataset(&mnist);
+	readDataset(&mnist, "mnist_test.csv");
+
+	printf("Epochs %d | Total Data Samples: %d | Genauigkeit auf Testdaten: %.2f%%\n", epochs, mnist.total_digits, evaluateTestSet(&net, &mnist));
 
 	int user_input = 0;
 	while (1) {
@@ -89,17 +84,12 @@ int main(int argv, char *argc[]) {
 			break;
 		}
 
-		int result = identifyDigit(&inputNeuron, &firstNeuron, &secondNeuron, &outputNeuron, &mnist.digits[user_input]);
+		int result = identifyDigit(&net, &mnist.digits[user_input]);
 		printDigit(&mnist.digits[user_input], 1);
 		printf("Neuronal Network result: %d\n", result);
 	}
 
-	//printDigit(&mnist.digits[1], 0);
-	//printDataset(&mnist);
-
 	freeDataset(&mnist);
-	freeNeuron(&inputNeuron);
-	freeNeuron(&firstNeuron);
-	freeNeuron(&outputNeuron);
+	freeNeuronalNetwork(&net);
 	return 0;
 }

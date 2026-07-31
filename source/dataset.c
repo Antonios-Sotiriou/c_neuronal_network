@@ -80,7 +80,6 @@ void shuffleDataset(Dataset *dt) {
 }
 void printDigit(Digit *dg, const int show_bg) {
 	int cols = 0;
-	printf("Digit value: %d\n", dg->value);
 	for (int i = 0; i < 784; i++) {
 		if (show_bg) {
 			printf("%03d", dg->pixels[i]);
@@ -98,6 +97,7 @@ void printDigit(Digit *dg, const int show_bg) {
 			cols = 0;
 		}
 	}
+	printf("Digit value: %d\n", dg->value);
 }
 void printDataset(Dataset *dt, const int show_bg) {
 	for (int i = 0; i < dt->total_digits; i++) {
